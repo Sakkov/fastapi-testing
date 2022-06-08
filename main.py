@@ -15,10 +15,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def home():
-    return {"Data": "Testing"}
+@app.get("/get-count")
+def getC():
+    f = open("count.txt", "r")
+    c = int(f.read())
+    f.close()
+    return c
 
-@app.get("/sus")
-def sus():
-    return {"hes": "sus"}
+@app.get("/increment-count")
+def incrementC():
+    f = open("count.txt", "r")
+    c = int(f.read()) + 1
+    f.close()
+    f = open("count.txt", "w")
+    f.write(str(c))
+    f.close()
+    return c
