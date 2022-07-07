@@ -43,5 +43,6 @@ def incrementC():
     cur = conn.cursor()
     cur.execute("SELECT count FROM count;")
     c = cur.fetchone()[0]
+    conn.commit()
     cur.close()
     return c
