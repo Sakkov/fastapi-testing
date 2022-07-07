@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import urllib.parse as up
+import psycopg2
 
 app = FastAPI()
 
@@ -15,19 +18,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+up.uses_netloc.append("postgres")
+url = up.urlparse(os.environ["DATABASE_URL"])
+conn = psycopg2.connect(database=url.path[1:],
+    user=url.username,
+    password=url.password,
+    host=url.hostname,
+    port=url.port
+)
+
 @app.get("/get-count")
 def getC():
-    f = open("count.txt", "r")
-    c = int(f.read())
-    f.close()
+    cur = conn.cursor()
+    cur.execute("SELECT count FROM count;")
+    c = cur.fetchone()[0]
+    cur.close()
     return c
 
 @app.get("/increment-count")
 def incrementC():
-    f = open("count.txt", "r")
-    c = int(f.read()) + 1
-    f.close()
-    f = open("count.txt", "w")
-    f.write(str(c))
-    f.close()
+    cur = conn.cursor()
+    cur.execute("UPDATE count SET count = count + 1")
+    cur.close()
+    cur = conn.cursor()
+    cur.execute("SELECT count FROM count;")
+    c = cur.fetchone()[0]
+    cur.close()
     return c
